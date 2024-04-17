@@ -1,0 +1,45 @@
+//========= Keyboard aware viewport =========//
+// View
+ <KeyboardAvoidingView
+behavior={Platform.OS === "ios" ? "padding" : "height"}
+style={styles.container}
+>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+
+// Message and Form
+
+        </View>
+    </TouchableWithoutFeedback>
+</KeyboardAvoidingView>
+// StatusBar
+
+
+//========= Submit to firestore =========//
+try {
+    await addDoc(collection(firestore, "messages"), {
+        text: message,
+        createdAt: serverTimestamp(),
+    });
+} catch (e) {}
+
+
+//========= Render messages =========//
+React.useEffect(() => {
+    const q = query(
+      collection(firestore, "messages"),
+      orderBy("createdAt", "asc"),
+      limit(50)
+    );
+
+    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
+      const fetchedMessages: any[] = [];
+      QuerySnapshot.forEach((doc) => {
+        fetchedMessages.push({ ...doc.data(), id: doc.id });
+      });
+
+      setMessages(fetchedMessages);
+    });
+
+    return unsubscribe;
+  }, []);
